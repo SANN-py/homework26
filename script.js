@@ -135,8 +135,14 @@ function update() {
 }
 function deleteProduct(index) {
   const product = products[index];
+
+  const confirmDelete = confirm(
+    `Are you sure you want to delete "${product.name}"?`
+  );
+
+  if (!confirmDelete) return;
+
   products.splice(index, 1);
-  alert(`you sure to delete ${product.name}`);
   renderProduct();
 }
 
