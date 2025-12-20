@@ -8,11 +8,46 @@ const descriptionEl = document.getElementById("description");
 const modalEl = document.getElementById("crud-modal");
 const updateBtnEl = document.getElementById("updateBtn");
 const createBtnEl = document.getElementById("createBtn");
+const filterEl = document.getElementById("filterSelect");
+const searchEl = document.getElementById("searchInput");
 
-const products = [];
+let products = [];
 let productsIndex;
-let editIndex = null;
-let isEdit = false;
+// let editIndex = null;
+// let isEdit = false;
+
+document.addEventListener("DOMContentLoaded", function () {
+  getData();
+  renderProduct();
+});
+
+function searchProduct() {
+  const userSearch = searchEl.value.toLowerCase();
+  const result = products.filter(function (product) {
+    return product.name.toLowerCase().includes(userSearch);
+  });
+  renderProduct(result);
+}
+
+function filterProduct() {
+  const filterValue = filterEl.value;
+  let result = products;
+
+  if (filterValue === "Laptop") {
+    result = products.filter(function (product) {
+      return product.category === "Laptop";
+    });
+  } else if (filterValue == "Phones") {
+    result = products.filter(function (product) {
+      return product.category === "Phones";
+    });
+  } else if (filterValue === "Accessories") {
+    result = products.filter(function (product) {
+      return product.category === "Accessories";
+    });
+  }
+  renderProduct(result);
+}
 
 function openCreateModal() {
   clearInput();
@@ -34,6 +69,7 @@ function createProduct() {
   };
 
   products.push(newProduct);
+  saveToStorage();
   renderProduct();
   closeModal(); // ✅ close modal
   clearInput();
@@ -44,9 +80,9 @@ function createProduct() {
   updateBtnEl.classList.add("hidden");
 }
 
-function renderProduct() {
+function renderProduct(productList = products) {
   tbodyEl.innerHTML = "";
-  products.forEach((product, index) => {
+  productList.forEach((product, index) => {
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 transition";
 
@@ -91,7 +127,6 @@ function renderProduct() {
     tbodyEl.append(tr);
   });
 }
-renderProduct();
 
 function edit(index) {
   const product = products[index];
@@ -124,7 +159,7 @@ function update() {
     category: categoryEl.value,
     description: descriptionEl.value,
   };
-
+  saveToStorage();
   renderProduct();
   closeModal();
   clearInput();
@@ -143,6 +178,7 @@ function deleteProduct(index) {
   if (!confirmDelete) return;
 
   products.splice(index, 1);
+  saveToStorage();
   renderProduct();
 }
 
@@ -151,4 +187,15 @@ function openModal() {
 }
 function closeModal() {
   document.getElementById("crud-modal").classList.add("hidden");
+}
+
+function saveToStorage() {
+  localStorage.setItem("products", JSON.stringify(products));
+}
+
+function getData() {
+  const data = localStorage.getItem("products");
+  if (data) {
+    products = JSON.parse(data);
+  }
 }
